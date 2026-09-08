@@ -1,6 +1,6 @@
 
 #Problem 1
-
+```{r}
 library(alr4)
 
 head(UBSprices)
@@ -13,12 +13,14 @@ mod1 <- lm(log(bigmac2009) ~ log(bigmac2003), data=UBSprices)
 
 mod1
 summary(mod1)
+```
+
 
 # Simple linear regression isn't appropriate because the relationship is not linear and the variability changes across the range of the data. The log to log plot is more appropriate because the transformation makes the relationship more  linear and reduces the changing variability. For every 1% increase in the price of a Big Mac in 2003, the price of a Big Mac in 2009 is expected to increase by the amount of the slope coefficient, as a percentage.
 
 
 #Problem 2
-
+```{r}
 library(alr4)
 
 head(oldfaith)
@@ -36,11 +38,14 @@ predict(mod, newdata=data.frame(Duration=250),
 
 predict(mod, newdata=data.frame(Duration=250), 
         interval="prediction")
+```
+
 
 # If the eruption would last for 250 seconds, then the model predicts that the visitor will wait about 78.2 minutes for the next eruption. The 95% confidence interval for the average waiting time is 77.37 to 79.04 minutes. For the visitor, the interval is the 95% prediction interval, which is 66.35 to 90.05 minutes. This interval is wider because it accounts for the variation in individual eruption intervals.
 
 #Problem 3
 
+```{r}
 library(alr4)
 library(car)
 
@@ -52,6 +57,8 @@ mod
 summary(mod)
 
 avPlots(mod)
+```
+
 
 # The model shows that fertility decreases as GDP per person increases, while holding percent urban constant. The log(ppgdp) coefficient is significant, but pctUrban is not (0.918). The added-variable plots support this: GDP has a negative relationship with fertility, while percent urban has almost no relationship. GDP per person is the more important predictor.
 
@@ -59,6 +66,8 @@ avPlots(mod)
 
 
 #Problem 4
+
+```{r}
 
 library(car)
 
@@ -81,5 +90,7 @@ summary(mod1)
 summary(mod2)
 summary(mod3)
 summary(mod4)
+```
+
 
 # Models 1, 2, and 3 all have a R2 of 0.9091. They also produce the same predictions. Their main difference is how the predictors are described. Model 1 uses the two transaction types, while Models 2 and 3 use combinations of the two. Model 4 has the same overall fit, but it has a problem because it includes redundant predictors. I would use Model 1 because it is the easiest to understand. It directly uses t1 and t2, which are the two types of transactions.
