@@ -1,5 +1,6 @@
 #Problem 1
 
+```{r}
 library(alr4)
 
 data(jevons)
@@ -75,10 +76,91 @@ data.frame(Age=1:5,
            SEpred=SEpred,
            Z=z,
            ProbBelowLegal=Prob)
-
+```
 
 #Analysis: The model shows that coin weight decreases by about 0.0238 grams for every one-year increase in age. Compared with ordinary least squares, weighted least squares gives more weight to the age groups with smaller variance, shwoing a less negative slope. The predicted weights at ages 1 and 2 are above the 7.9379 g legal minimum, while ages 3–5 are below it. This suggests that coins are likely to fall below the legal minimum starting at around age 3.
 
 
 
 #Problem 2
+
+```{r}
+
+library(alr4)
+
+data(stopping)
+
+head(stopping)
+
+# Scatter plot
+plot(stopping$Distance~stopping$Speed,
+     xlab="Speed",
+     ylab="Stopping Distance",
+     main="Stopping Distance vs Speed")
+
+# Original model
+M1=lm(Distance~Speed,data=stopping)
+
+summary(M1)
+
+# Square-root transformation of Distance
+M2=lm(sqrt(Distance)~Speed,data=stopping)
+
+summary(M2)
+
+# Plot the transformed relationship
+plot(sqrt(Distance)~Speed,data=stopping,
+     xlab="Speed",
+     ylab="Square Root of Stopping Distance",
+     main="Square Root of Distance vs Speed")
+
+abline(M2)
+
+```
+
+#The scatterplot shows that stopping distance increases as speed increases, but the relationship is not completely linear and the variability gets larger at higher speeds. A square-root transformation of Distance makes the relationship more linear for OLS. The transformed model shows that stopping distance increases as speed increases. Overall, the square-root transformation provides a better model for estimating stopping distance from speed.
+
+
+#Problem 3
+
+```{r}
+
+library(alr4)
+library(car)
+
+data(MinnLand)
+
+head(MinnLand)
+help(MinnLand)
+
+
+summary(MinnLand)
+
+# Looked at the main relationships
+plot(log(acrePrice)~improvements,data=MinnLand)
+plot(log(acrePrice)~log(acres),data=MinnLand)
+plot(log(acrePrice)~tillable,data=MinnLand)
+plot(log(acrePrice)~crpPct,data=MinnLand)
+plot(log(acrePrice)~productivity,data=MinnLand)
+plot(log(acrePrice)~year,data=MinnLand)
+
+
+M1=lm(log(acrePrice)~improvements+year+log(acres)+
+        tillable+crpPct+productivity,
+      data=MinnLand)
+
+summary(M1)
+
+
+par(mfrow=c(2,2))
+plot(M1)
+par(mfrow=c(1,1))
+
+# Check individual relationships
+avPlots(M1)
+
+# Check for nonconstant variance
+ncvTest(M1)
+```
+
+#The model shows that land prices are related to several factors, including improvements, year, farm size, tillable land, and productivity. Using log transformations for acrePrice and acres helps make the relationships more appropriate for a linear regression model. Overall, the model provides a way to explain differences in Minnesota land prices based on the characteristics of the land.
