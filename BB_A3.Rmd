@@ -1,1 +1,84 @@
+#Problem 1
 
+library(alr4)
+
+data(jevons)
+
+head(jevons)
+
+# Weight versus Age
+plot(jevons$Weight~jevons$Age,
+     xlab="Age",
+     ylab="Average Weight",
+     main="Gold Coin Weight vs Age")
+
+# SD versus Age
+plot(jevons$SD~jevons$Age,
+     xlab="Age",
+     ylab="Standard Deviation",
+     main="SD vs Age")
+
+# Variance of each age-group mean
+Var=jevons$SD^2/jevons$n
+
+# WLS weights
+Wts=1/Var
+
+# Weighted least squares model
+WLS=lm(Weight~Age,data=jevons,weights=Wts)
+
+summary(WLS)
+
+# Original least squares model
+OLS=lm(Weight~Age,data=jevons)
+
+summary(OLS)
+
+# Plot WLS and OLS fitted lines
+plot(jevons$Weight~jevons$Age,
+     xlab="Age",
+     ylab="Average Weight",
+     main="WLS and OLS Fits")
+
+abline(WLS)
+abline(OLS,col=2)
+
+# prediction for ages 1 through 5
+newdata=data.frame(Age=1:5)
+
+predict(WLS,newdata)
+
+# Predicted values and standard errors
+fit=predict(WLS,newdata,se.fit=TRUE)
+
+fit$fit
+fit$se.fit
+
+# Standard deviation for individual coin
+SDnew=jevons$SD
+
+# Prediction standard error for an individual coin
+SEpred=sqrt(SDnew^2+fit$se.fit^2)
+
+# Legal minimum coin weight
+Legal=7.9379
+
+# Calculate z-scores
+z=(Legal-fit$fit)/SEpred
+
+# Probability that an individual coin is below the legal minimum
+Prob=pnorm(z)
+
+#predictions and probabilities
+data.frame(Age=1:5,
+           PredictedWeight=fit$fit,
+           SEpred=SEpred,
+           Z=z,
+           ProbBelowLegal=Prob)
+
+
+#Analysis: The model shows that coin weight decreases by about 0.0238 grams for every one-year increase in age. Compared with ordinary least squares, weighted least squares gives more weight to the age groups with smaller variance, shwoing a less negative slope. The predicted weights at ages 1 and 2 are above the 7.9379 g legal minimum, while ages 3–5 are below it. This suggests that coins are likely to fall below the legal minimum starting at around age 3.
+
+
+
+#Problem 2
