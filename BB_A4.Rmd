@@ -1,1 +1,111 @@
+#Brady Beckner Assignment 4
+#Problem 1
 
+library(alr4)
+library(car)
+
+data(MinnLand)
+
+# Turned year into a factor
+MinnLand$fyear=factor(MinnLand$year)
+
+#Created boxplot of log acre price by year
+
+boxplot(log(acrePrice)~fyear,
+        data=MinnLand,
+        xlab="Year",
+        ylab="Log(Acre Price)",
+        main="Log(Acre Price by Year)")
+M1=lm(log(acrePrice)~fyear,data=MinnLand)
+
+# results
+summary(M1)
+
+# anova test
+anova(M1)
+
+par(mfrow=c(2,2))
+plot(M1)
+par(mfrow=c(1,1))
+
+# Non-constant variance test
+ncvTest(M1)
+
+# No, the Minnesota data do not show this same pattern as the U.S. The boxplots show that farm prices increased from 2002 through 2010, with a decline in 2011. The regression coefficients support this pattern: the coefficients become positive through 2010, and the 2011 coefficient is slightly smaller than the 2010 coefficient.
+
+
+
+#Problem 2
+
+library(alr4)
+library(car)
+library(effects)
+
+data(MinnLand)
+
+MinnLand$fyear=factor(MinnLand$year)
+
+M1=lm(log(acrePrice)~fyear+region,data=MinnLand)
+
+M2=lm(log(acrePrice)~fyear+region+fyear*region,data=MinnLand)
+
+summary(M1)
+summary(M2)
+
+anova(M1,M2)
+
+par(mfrow=c(2,2))
+plot(M2)
+par(mfrow=c(1,1))
+
+allEffects(M2)
+plot(allEffects(M2),
+     grid=TRUE,
+     multiline=TRUE,
+     ylab="Acre Price")
+
+#M1 assumes that the effect of year is the same across all regions, while M2 includes year by region and allows the effect of year to differ by region. The model comparison shows that the interaction is statistically significant (p < 0.001), so M2 provides a better fit than M1. In M2, the coefficients represent differences from the reference year and reference region, while the interaction coefficients show how those yearly changes differ by region. The effects plot shows that the Northwest has much lower land prices than the other regions, while all regions show increasing prices over time, with some differences in the size of the increase.
+
+
+#Problem 3
+
+library(alr4)
+
+data(salary)
+
+# Two-sample t-test
+t.test(salary$salary[salary$sex=="Male"],
+       salary$salary[salary$sex=="Female"],
+       alternative="greater")
+
+# Model using all variables
+M1=lm(salary~degree+rank+sex+year+ysdeg,data=salary)
+summary(M1)
+
+# Model without rank
+M2=lm(salary~degree+sex+year+ysdeg,data=salary)
+summary(M2)
+
+#The two-sample t-test produced a p-value of 0.04505. Since this is less than 0.05, reject the null hypothesis and the evidence shows that the mean salary of males is greater than the mean salary of females. However, the p-value is greater than 0.01, so the result is not significant at the 0.01 level. In the full regression model, the sex coefficient was $1,166.37 with a p-value of 0.214, so sex was not statistically significant after controlling for degree, rank, year, and years since degree. When rank was removed, the sex coefficient changed to -$1,286.54 with a p-value of 0.332, still not statistically significant. This shows that rank has a strong effect on salary and can change the relationship between sex and salary.
+
+
+#Problem 4
+
+library(alr4)
+
+data(wool)
+
+wool$len=factor(wool$len)
+wool$amp=factor(wool$amp)
+wool$load=factor(wool$load)
+
+M1=lm(cycles~len+amp+load,data=wool)
+
+summary(M1)
+anova(M1)
+
+M1aov=aov(cycles~len+amp+load,data=wool)
+
+TukeyHSD(M1aov,"load")
+
+#The model shows that length, amplitude, and load all have statistically significant effects on the number of cycles to failure. The anova results show significant effects for length (p < 0.001), amplitude (p < 0.001), and load (p = 0.041). For load, the Tukey results show that the difference between 40g and 50g is statistically significant because the 95% confidence interval does not contain 0, while the differences between 40g and 45g and between 45g and 50g are not significant. Increasing the load from 40g to 50g is associated with less cycles before the yarn fails.
