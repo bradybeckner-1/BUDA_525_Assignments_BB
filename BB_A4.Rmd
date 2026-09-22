@@ -96,7 +96,10 @@ summary(M2)
 ```{r}
 library(alr4)
 
-data(wool)
+wool=read.table(system.file("extdata","wool.txt",package="alr4"),
+                header=TRUE)
+
+names(wool)=c("len","amp","load","cycles")
 
 wool$len=factor(wool$len)
 wool$amp=factor(wool$amp)
