@@ -1,5 +1,5 @@
 #Brady Beckner Assignment 5
-
+```{r}
 library(alr4)
 library(caret)
 library(parallel)
@@ -178,5 +178,5 @@ CVresults=data.frame(
 
 CVresults
 
-
+```
 #Two candidate models were created using log(acrePrice) and sqrt(acrePrice) as the response variables. The models were compared using 5-fold cross-validation, 10-fold cross-validation, and 1,000 random splits. The log(acrePrice) model had lower mae for all three methods: 672.56 compared to 680.68 for 5-fold, 673.49 compared to 680.84 for 10-fold, and 673.19 compared to 681.44 for the 1,000 random splits. I would select the log(acrePrice) model as the final model, and the results show that land prices are related to acreage, region, year, tillable land, financing, and CRP percentage.
