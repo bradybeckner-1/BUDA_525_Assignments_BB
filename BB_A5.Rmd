@@ -1,1 +1,182 @@
+#Brady Beckner Assignment 5
 
+library(alr4)
+library(caret)
+library(parallel)
+
+data(MinnLand)
+
+# Removed all missing values
+MinnLand=na.omit(MinnLand)
+
+MinnLand$year=factor(MinnLand$year)
+
+
+# Model 1: log response
+M1=lm(log(acrePrice)~
+        log(acres)*region+
+        year*region+
+        tillable+
+        financing+
+        crpPct,
+      data=MinnLand)
+
+summary(M1)
+
+
+# Model 2: square-root response
+M2=lm(sqrt(acrePrice)~
+        log(acres)*region+
+        year*region+
+        tillable+
+        financing+
+        crpPct,
+      data=MinnLand)
+
+summary(M2)
+
+
+# 5-Fold Cross-Validation
+
+set.seed(1010)
+
+Sets=createFolds(MinnLand$acrePrice,k=5,list=TRUE)
+
+M1mae=0
+M2mae=0
+
+for(k in 1:5){
+  
+  TestDat=MinnLand[Sets[[k]],]
+  TrainingDat=MinnLand[-Sets[[k]],]
+  
+  m1=lm(log(acrePrice)~
+           log(acres)*region+
+           year*region+
+           tillable+financing+crpPct,
+         data=TrainingDat)
+  
+  m2=lm(sqrt(acrePrice)~
+           log(acres)*region+
+           year*region+
+           tillable+financing+crpPct,
+         data=TrainingDat)
+  
+  p1=exp(predict(m1,newdata=TestDat))
+  p2=predict(m2,newdata=TestDat)^2
+  
+  M1mae=M1mae+sum(abs(TestDat$acrePrice-p1))
+  M2mae=M2mae+sum(abs(TestDat$acrePrice-p2))
+}
+
+M1mae/nrow(MinnLand)
+M2mae/nrow(MinnLand)
+
+
+# 10-Fold Cross-Validation
+
+set.seed(1010)
+
+Sets=createFolds(MinnLand$acrePrice,k=10,list=TRUE)
+
+M1mae=0
+M2mae=0
+
+for(k in 1:10){
+  
+  TestDat=MinnLand[Sets[[k]],]
+  TrainingDat=MinnLand[-Sets[[k]],]
+  
+  m1=lm(log(acrePrice)~
+           log(acres)*region+
+           year*region+
+           tillable+financing+crpPct,
+         data=TrainingDat)
+  
+  m2=lm(sqrt(acrePrice)~
+           log(acres)*region+
+           year*region+
+           tillable+financing+crpPct,
+         data=TrainingDat)
+  
+  p1=exp(predict(m1,newdata=TestDat))
+  p2=predict(m2,newdata=TestDat)^2
+  
+  M1mae=M1mae+sum(abs(TestDat$acrePrice-p1))
+  M2mae=M2mae+sum(abs(TestDat$acrePrice-p2))
+}
+
+M1mae/nrow(MinnLand)
+M2mae/nrow(MinnLand)
+
+
+#1000 Random Splits
+
+randomSplit=function(i){
+  
+  set.seed(3322+i)
+  
+  Test=sample(1:nrow(MinnLand),
+              size=round(.25*nrow(MinnLand)),
+              replace=FALSE)
+  
+  TrainingDat=MinnLand[-Test,]
+  TestDat=MinnLand[Test,]
+  
+  m1=lm(log(acrePrice)~
+           log(acres)*region+
+           year*region+
+           tillable+financing+crpPct,
+         data=TrainingDat)
+  
+  m2=lm(sqrt(acrePrice)~
+           log(acres)*region+
+           year*region+
+           tillable+financing+crpPct,
+         data=TrainingDat)
+  
+  p1=exp(predict(m1,newdata=TestDat))
+  p2=predict(m2,newdata=TestDat)^2
+  
+  c(mean(abs(TestDat$acrePrice-p1)),
+    mean(abs(TestDat$acrePrice-p2)))
+}
+
+
+# Parallel computing
+cl=makeCluster(detectCores()-1)
+
+clusterExport(cl,c("MinnLand","randomSplit"))
+
+Results=parLapply(cl,1:1000,randomSplit)
+
+stopCluster(cl)
+
+Results=do.call(rbind,Results)
+
+colnames(Results)=c("Log_MAE","Sqrt_MAE")
+
+mean(Results[,1])
+mean(Results[,2])
+
+
+#Comparisons
+
+CVresults=data.frame(
+  Method=c("5-Fold","10-Fold","Random 1000"),
+  Log_MAE=c(
+    672.5578,
+    673.4903,
+    673.1929
+  ),
+  Sqrt_MAE=c(
+    680.6813,
+    680.8364,
+    681.4419
+  )
+)
+
+CVresults
+
+
+#Two candidate models were created using log(acrePrice) and sqrt(acrePrice) as the response variables. The models were compared using 5-fold cross-validation, 10-fold cross-validation, and 1,000 random splits. The log(acrePrice) model had lower mae for all three methods: 672.56 compared to 680.68 for 5-fold, 673.49 compared to 680.84 for 10-fold, and 673.19 compared to 681.44 for the 1,000 random splits. I would select the log(acrePrice) model as the final model, and the results show that land prices are related to acreage, region, year, tillable land, financing, and CRP percentage.
